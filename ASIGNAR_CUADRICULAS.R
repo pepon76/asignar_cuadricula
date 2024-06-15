@@ -1,14 +1,18 @@
 library(tidyverse)
 library(ggmap)
 library(readxl)
+register_stadiamaps("YOUR_STADIAMAPS_APIKEY")
 
-# Definir los límites del área de zoom
+# Definir los límites del área de zoom, puedes redefinir estos limites usando el boton exportar de la web
+# https://www.openstreetmap.org/
+
 xlim_min <- -25.71
 xlim_max <- 43.27
 ylim_min <- 21
 ylim_max <- 51.02
 
-# Crear una secuencia de coordenadas desde -180 hasta 180, con un paso de 5
+
+# Crear una secuencia de coordenadas desde -180 hasta 180, con un paso de 5° , si lo ncesitas puedes modificar el grid
 x_coords <- seq(-180, 180, by = 5)
 y_coords <- seq(-180, 180, by = 5)
 
@@ -27,14 +31,14 @@ grid_data <- expand.grid(x = x_coords, y = y_coords) %>%
       TRUE ~ NA_integer_
     ),
     nombre = case_when(
-      x >= 0 & y >= 0 ~ paste0(sprintf("%02d", y), sprintf("%02d", x)),        # Cuadrante 1: límite inferior y izquierdo
-      x >= 0 & y < 0 ~ paste0(sprintf("%02d", abs(y + 5)), sprintf("%02d", x)), # Cuadrante 2: límite superior e izquierdo
+      x >= 0 & y >= 0 ~ paste0(sprintf("%02d", abs(y)), sprintf("%02d", abs(x))),        # Cuadrante 1: límite inferior y izquierdo
+      x >= 0 & y < 0 ~ paste0(sprintf("%02d", abs(y + 5)), sprintf("%02d", abs(x))), # Cuadrante 2: límite superior e izquierdo
       x < 0 & y < 0 ~ paste0(sprintf("%02d", abs(y + 5)), sprintf("%02d", abs(x + 5))),  # Cuadrante 3: límite superior y derecho
-      x < 0 & y >= 0 ~ paste0(sprintf("%02d", y), sprintf("%02d", abs(x + 5)))  # Cuadrante 4: límite inferior y derecho
+      x < 0 & y >= 0 ~ paste0(sprintf("%02d", abs(y)), sprintf("%02d", abs(x + 5)))  # Cuadrante 4: límite inferior y derecho
     )
   )
 
-# Filtrar los datos para que solo incluyan el área de interés
+# Solo, si es necesario, filtrar los datos para que solo incluyan el área de interés
 filtered_data <- grid_data %>%
   filter(left >= xlim_min & right <= xlim_max & bottom >= ylim_min & top <= ylim_max) %>%
   rename(lon = left, lat = bottom)
@@ -72,7 +76,7 @@ asignar_cuadrante_cuadricula <- function(x, y) {
     x < 0 & y >= 0 ~ 4
   )
   
-# Determinar en qué cuadrícula está el punto dentro del cuadrante
+  # Determinar en qué cuadrícula está el punto dentro del cuadrante
   if (cuadrante == 1) {
     cuadricula_x <- floor(x / 5) * 5
     cuadricula_y <- floor(y / 5) * 5
@@ -87,7 +91,7 @@ asignar_cuadrante_cuadricula <- function(x, y) {
     cuadricula_y <- floor(y / 5) * 5
   }
   
-# Convertir las coordenadas de la cuadrícula a caracteres y asegurar que tengan cuatro dígitos
+  # Convertir las coordenadas de la cuadrícula a caracteres y asegurar que tengan cuatro dígitos
   cuadricula_x <- sprintf("%02d", cuadricula_x)
   cuadricula_y <- sprintf("%02d", cuadricula_y)
   
@@ -102,9 +106,10 @@ asignar_cuadrante_cuadricula <- function(x, y) {
 
 # IMPORTAMOS DATOS REALES LLBASE ----------------------------------------------------------------------------------
 # Aplicar la función a cada fila de la serie de puntos y agregar los resultados al dataframe
+# Ahora cargas tus datos , tienen que tener un campo X(longitud) y un campo Y(latitud)
 
-LLBASE <- read_excel("C:/Users/jose.moreno/Desktop/ARCHIVOS_PROCESOS_ICCAT/2023/LLBASE_2023.xlsx")
-
+LLBASE <- read_excel("C:/Users/pepe/Desktop/ARCHIVOS_PROCESOS_ICCAT/2023/LLBASE_2023.xlsx")
+names(LLBASE)
 
 mis_puntos <- LLBASE %>% select(ID_DIARIO,X,Y) %>% rename("x" = "X", "y"="Y") %>% 
   rowwise() %>%
@@ -132,10 +137,3 @@ ggmap(map) +
        fill = "Cuadrante") +
   scale_fill_manual(values = c("1" = "lightblue", "2" = "lightgreen", "3" = "lightpink", "4" = "lightyellow"))+
   geom_point(data = mis_puntos,aes(x,y),size = 0.5)
-
-
-
-
-
-
-
