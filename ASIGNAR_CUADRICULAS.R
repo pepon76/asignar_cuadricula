@@ -1,6 +1,7 @@
 library(tidyverse)
 library(ggmap)
 library(readxl)
+
 register_stadiamaps("YOUR_STADIAMAPS_APIKEY")
 
 # Definir los límites del área de zoom, puedes redefinir estos limites usando el boton exportar de la web
