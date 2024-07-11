@@ -1,6 +1,7 @@
 library(tidyverse)
 library(ggmap)
 library(readxl)
+library(openxlsx)
 
 register_stadiamaps("YOUR_STADIAMAPS_APIKEY")
 
@@ -93,17 +94,13 @@ asignar_cuadrante_cuadricula <- function(x, y) {
   }
   
   # Convertir las coordenadas de la cuadrícula a caracteres y asegurar que tengan cuatro dígitos
-  cuadricula_x <- sprintf("%02d", cuadricula_x)
-  cuadricula_y <- sprintf("%02d", cuadricula_y)
+  cuadricula_x <- sprintf("%02d", abs(cuadricula_x))
+  cuadricula_y <- sprintf("%02d", abs(cuadricula_y))
   
   cuadricula <- paste0(cuadricula_y, cuadricula_x)
   
   return(list(cuadrante = cuadrante, cuadricula = cuadricula))
 }
-
-
-
-
 
 # IMPORTAMOS DATOS REALES LLBASE ----------------------------------------------------------------------------------
 # Aplicar la función a cada fila de la serie de puntos y agregar los resultados al dataframe
@@ -126,7 +123,6 @@ mis_puntos <- LLBASE %>% select(ID_DIARIO,X,Y) %>% rename("x" = "X", "y"="Y") %>
 
 View(mis_puntos)
 
-
 # GRAFICO_COMPLETO ------------------------------------------------------------------------------------------------
 
 ggmap(map) +
@@ -137,4 +133,9 @@ ggmap(map) +
        y = "Latitud",
        fill = "Cuadrante") +
   scale_fill_manual(values = c("1" = "lightblue", "2" = "lightgreen", "3" = "lightpink", "4" = "lightyellow"))+
-  geom_point(data = mis_puntos,aes(x,y),size = 0.5)
+  geom_point(data = mis_puntos, aes(x, y), size = 0.5)
+
+
+
+write.xlsx(mis_puntos, "mis_puntos.xlsx")
+getwd()
