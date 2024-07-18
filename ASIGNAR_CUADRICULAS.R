@@ -127,7 +127,7 @@ View(mis_puntos)
 
 ggmap(map) +
   geom_rect(data = filtered_data, aes(xmin = lon, xmax = lon + 5, ymin = lat, ymax = lat + 5, fill = factor(cuadrante)), color = "black", alpha = 0.5) +
-  geom_text(data = filtered_data, aes(x = lon + 2.5, y = lat + 2.5, label = nombre), color = "black", size = 2) +
+  geom_text(data = filtered_data, aes(x = lon + 2.5, y = lat + 2.5, label = nombre), color = "black", size = 5) +
   labs(title = "Cuadrícula de 5x5 grados con nombres y cuadrantes (Área de Zoom)",
        x = "Longitud",
        y = "Latitud",
